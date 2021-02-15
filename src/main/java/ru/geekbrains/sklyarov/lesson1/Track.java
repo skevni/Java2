@@ -8,16 +8,8 @@ public class Track implements Obstacle {
     }
 
     @Override
-    public boolean overcome(Action action) {
-        System.out.printf("Длина дорожки %f м.\n", length);
-        action.run();
-        if (action.getLimitTrack() > length) {
-            System.out.println(action.getName() + " пробежал");
-            return true;
-        } else {
-            System.out.println(action.getName() + " не смог пробежать");
-        }
-        return false;
+    public void overcome(Participant participant) {
+        participant.run(length);
     }
 
 }

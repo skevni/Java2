@@ -8,15 +8,7 @@ public class Wall implements Obstacle {
     }
 
     @Override
-    public boolean overcome(Action action) {
-        System.out.printf("Высота стены %f м.\n", height);
-        action.jump();
-        if (height < action.getLimitWall()) {
-            System.out.println(action.getName() + " перепрыгнул стену!");
-            return true;
-        } else {
-            System.out.println(action.getName() + " не смог перепрыгнуть стену!");
-        }
-        return false;
+    public void overcome(Participant participant) {
+        participant.jump(height);
     }
 }
