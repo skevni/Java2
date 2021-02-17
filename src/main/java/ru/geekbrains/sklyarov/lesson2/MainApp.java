@@ -9,7 +9,7 @@ public class MainApp {
     public static int getArray(String[][] strings) {
         int sum = 0;
         try {
-            if (strings.length > 4 || strings[0].length > 4) {
+            if (strings.length != 4 || strings[0].length != 4) {
                 try {
                     throw new MyArraySizeException("Передан неверный размер массива. Допустим двумерный массив 4 х 4");
                 } catch (ArrayIndexOutOfBoundsException e) {
