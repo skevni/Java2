@@ -3,10 +3,14 @@ package ru.geekbrains.sklyarov.lesson2;
 public class MainApp {
     public static void main(String[] args) {
         String[][] s = {{"1","2g","3","4"},{"5","6","7","8"},{"9","10","11","12"},{"13","14","15","16"}};
-        System.out.println("Сумма элементов массива: " + getArray(s));
+        try {
+            System.out.println("Сумма элементов массива: " + calcElementsSum(s));
+        }catch (MyArrayDataException e){
+            e.printStackTrace();
+        }
     }
 
-    public static int getArray(String[][] strings) {
+    public static int calcElementsSum(String[][] strings) throws MyArrayDataException{
         int sum = 0;
         try {
             if (strings.length != 4 || strings[0].length != 4) {
@@ -25,11 +29,11 @@ public class MainApp {
                     }
                 }
             } catch (NumberFormatException e){
-                try {
+//                try {
                     throw new MyArrayDataException(i,j,strings[i][j]);
-                } catch (MyArrayDataException e2){
-                    e2.printStackTrace();
-                }
+//                } catch (MyArrayDataException e2){
+//                    e2.printStackTrace();
+//                }
 
             }
         } catch (NullPointerException e) {
