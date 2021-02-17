@@ -2,39 +2,34 @@ package ru.geekbrains.sklyarov.lesson2;
 
 public class MainApp {
     public static void main(String[] args) {
-        String[][] s = {{"1","2g","3","4"},{"5","6","7","8"},{"9","10","11","12"},{"13","14","15","16"}};
+        String[][] s = {{"1", "2", "3", "4"}, {"5", "6", "7", "8"}, {"9", "10", "11", "12"}, {"13", "14", "15", "16"}};
         try {
             System.out.println("Сумма элементов массива: " + calcElementsSum(s));
-        }catch (MyArrayDataException e){
+        } catch (RuntimeException e) {
             e.printStackTrace();
         }
     }
 
-    public static int calcElementsSum(String[][] strings) throws MyArrayDataException{
+    public static int calcElementsSum(String[][] strings) throws RuntimeException {
         int sum = 0;
         try {
-            if (strings.length != 4 || strings[0].length != 4) {
-                try {
-                    throw new MyArraySizeException("Передан неверный размер массива. Допустим двумерный массив 4 х 4");
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    e.printStackTrace();
+            for (int i = 0; i < strings.length; i++) {
+                if (strings.length != 4 || strings[i].length != 4) {
+//                    try {
+                        throw new MyArraySizeException("Передан неверный размер массива. Допустим двумерный массив 4 х 4");
+//                    } catch (ArrayIndexOutOfBoundsException e) {
+//                        e.printStackTrace();
+//                        sum = 0;
+//                        break;
+//                    }
                 }
-            }
-            int i=-1, j=-1;
-            try {
-
-                for (i=0;i < strings.length; i++) {
-                    for (j=0; j < strings[i].length; j++) {
+                for (int j = 0; j < strings.length; j++) {
+                    try {
                         sum += Integer.parseInt(strings[i][j]);
+                    } catch (NumberFormatException e) {
+                        throw new MyArrayDataException(i, j, strings[i][j]);
                     }
                 }
-            } catch (NumberFormatException e){
-//                try {
-                    throw new MyArrayDataException(i,j,strings[i][j]);
-//                } catch (MyArrayDataException e2){
-//                    e2.printStackTrace();
-//                }
-
             }
         } catch (NullPointerException e) {
             e.printStackTrace();
