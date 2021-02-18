@@ -12,7 +12,7 @@ public class MainApp {
 
     public static int calcElementsSum(String[][] strings) throws RuntimeException {
         int sum = 0;
-        try {
+
             for (int i = 0; i < strings.length; i++) {
                 if (strings.length != 4 || strings[i].length != 4) {
 //                    try {
@@ -31,9 +31,6 @@ public class MainApp {
                     }
                 }
             }
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
         return sum;
     }
 }
