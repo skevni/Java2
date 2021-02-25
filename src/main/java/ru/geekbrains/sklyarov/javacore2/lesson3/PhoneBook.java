@@ -1,58 +1,45 @@
 package ru.geekbrains.sklyarov.javacore2.lesson3;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.*;
 
 public class PhoneBook {
-    private final HashMap<String, ArrayList<String>> phoneBook;
+    private final HashMap<String, Set<String>> phoneBook;
 
     public PhoneBook(String name, String phone) {
         phoneBook = new HashMap<>();
-        phoneBook.put(name, new ArrayList<>(Collections.singletonList(phone)));
+        phoneBook.put((name.equals("") ? phone : name), new HashSet<>(Collections.singletonList(phone)));
     }
 
     public void add(String name, String phone) {
-        if (phone.equals("")) {
-            return;
+        addPhone(name, new HashSet<>(Collections.singleton(phone)));
+    }
+
+    public void add(String name, HashSet<String> phone) {
+        addPhone(name, phone);
+    }
+
+    private void addPhone(String name, HashSet<String> phone) {
+        if (phone.isEmpty() || phone.contains("")) {
+            throw new IllegalArgumentException("phone must not be empty or must not have string of length 0");
         }
         if (name.equals("")) {
-            name = phone;
-        }
-        addPhone(name, new ArrayList<>(Collections.singletonList(phone)));
-    }
-
-    public void add(String name, ArrayList<String> phone) {
-        if (!phone.isEmpty()) {
-            if (name.equals("")) {
-                for (String strPhone : phone) {
-                    if (!strPhone.equals("")) {
-                        name = strPhone;
-                    }
-                    this.addPhone(name, new ArrayList<>(Collections.singletonList(strPhone)));
+            for (String ph :
+                    phone) {
+                if (!phoneBook.containsKey(ph)) {
+                    phoneBook.put(ph, new HashSet<>());
                 }
-            } else {
-                this.addPhone(name, phone);
+                phoneBook.get(ph).add(ph);
             }
+        } else {
+            if (!phoneBook.containsKey(name)) {
+                phoneBook.put(name, new HashSet<>());
+            }
+            phoneBook.get(name).addAll(phone);
         }
     }
 
-    private void addPhone(String name, ArrayList<String> phone) {
-        if (this.phoneBook.containsKey(name)) {
-            ArrayList<String> newPhone = this.phoneBook.get(name);
-            newPhone.addAll(phone);
-            this.phoneBook.put(name, newPhone);
-        } else {
-            this.phoneBook.put(name, phone);
-        }
-    }
-
-    public ArrayList<String> get(String name) {
-        if (this.phoneBook.containsKey(name)) {
-            return this.phoneBook.get(name);
-        } else {
-            return (ArrayList<String>) Collections.singletonList("");
-        }
+    public Set<String> get(String name) {
+        return this.phoneBook.getOrDefault(name, Collections.emptySet());
     }
 
     @Override
