@@ -1,5 +1,7 @@
 package ru.geekbrains.sklyarov.javacore2.lesson5;
 
+import java.util.Arrays;
+
 public class MainApp {
     static final int SIZE = 10_000_000;
     static final int HALF = SIZE / 2;
@@ -28,13 +30,11 @@ public class MainApp {
     public static void firstMethod() {
         float[] arr = new float[SIZE];
 
-        for (int i = 0; i < SIZE; i++) {
-            arr[i] = 1;
-        }
+        Arrays.fill(arr, 1f);
 
         long time = System.currentTimeMillis();
 
-        calc(arr);
+        calc(arr,0);
 
         System.out.println("Время выполнения:" + (System.currentTimeMillis() - time));
     }
@@ -42,10 +42,7 @@ public class MainApp {
     public static void secondMethod() throws InterruptedException {
         float[] arr = new float[SIZE];
 
-        for (int i = 0; i < SIZE; i++) {
-            arr[i] = 1;
-
-        }
+        Arrays.fill(arr,1f);
         long timer = System.currentTimeMillis();
         long time = System.currentTimeMillis();
 
@@ -58,16 +55,16 @@ public class MainApp {
         System.out.println("Время на деление массива: " + (System.currentTimeMillis() - time));
 
         time = System.currentTimeMillis();
-        Thread tr1 = new Thread(() -> calc(arr2));
-        Thread tr2 = new Thread(() -> calc(arr3));
+        Thread tr1 = new Thread(() -> calc(arr2, 0));
+        Thread tr2 = new Thread(() -> calc(arr3, HALF));
 
         tr1.start();
         tr2.start();
 
         tr1.join();
-        System.out.printf("Поток %s выполни операции за %d\n", tr1.getName(), System.currentTimeMillis() - time);
+        System.out.printf("Поток %s выполния операции за %d\n", tr1.getName(), System.currentTimeMillis() - time);
         tr2.join();
-        System.out.printf("Поток %s выполни операции за %d\n", tr2.getName(), System.currentTimeMillis() - time);
+        System.out.printf("Поток %s выполния операции за %d\n", tr2.getName(), System.currentTimeMillis() - time);
 
         time = System.currentTimeMillis();
 
@@ -78,9 +75,11 @@ public class MainApp {
 
         System.out.println("\nВсего времени прошло: " + (System.currentTimeMillis() - timer));
     }
-    private static void calc(float[] sourceArr) {
+
+    private static void calc(float[] sourceArr, int offset) {
         for (int i = 0; i < sourceArr.length; i++) {
-            sourceArr[i] = (float) (sourceArr[i] * Math.sin(0.2f + (float)(i / 5)) * Math.cos(0.2f + (float)(i / 5)) * Math.cos(0.4f + (float)(i / 2)));
+            int index = i + offset;
+            sourceArr[i] = (float) (sourceArr[i] * Math.sin(0.2f + (float) (index / 5)) * Math.cos(0.2f + (float) (index / 5)) * Math.cos(0.4f + (float) (index / 2)));
         }
     }
 }
