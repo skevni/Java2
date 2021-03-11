@@ -28,7 +28,7 @@ public class Controller implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
-            socket = new Socket("localhost", 9000);
+            socket = new Socket("192.168.1.68", 9000);
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
             Thread thread = new Thread(() -> {
