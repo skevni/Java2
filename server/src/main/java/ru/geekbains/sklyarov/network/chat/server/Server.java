@@ -13,7 +13,6 @@ public class Server {
     private final InetAddress ip;
     private List<ClientHandler> clients;
 
-
     // Конструктор класса, если несколько сетевых интерфейсов и необходимо запустить на опеределенном eth
     public Server(InetAddress ip, int port) {
         this.ip = ip;
@@ -30,11 +29,11 @@ public class Server {
     private void start() {
         this.clients = new ArrayList<>();
         try (ServerSocket serverSocket = new ServerSocket(port, 0, ip)) {
-            System.out.printf("Server available on %s:%d",ip.toString(),port);
+            System.out.printf("Server available on %s:%d", ip.toString(), port);
             while (true) {
                 Socket socket = serverSocket.accept();
                 System.out.println("Client connected");
-                subscribe(new ClientHandler(this,socket));
+                new ClientHandler(this, socket);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -44,10 +43,11 @@ public class Server {
         }
     }
 
-    public synchronized void subscribe(ClientHandler clientHandler){
+    public synchronized void subscribe(ClientHandler clientHandler) {
         clients.add(clientHandler);
     }
-    public synchronized void unsubscribe(ClientHandler clientHandler){
+
+    public synchronized void unsubscribe(ClientHandler clientHandler) {
         clients.remove(clientHandler);
     }
 
@@ -56,5 +56,23 @@ public class Server {
                 clients) {
             clientHandler.sendMessage(message);
         }
+    }
+
+    public boolean isUsernameBusy(String username) {
+        for (ClientHandler clientHandler : clients) {
+            if (clientHandler.getUsername().equals(username)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public ClientHandler privateChat(String username) {
+        for (ClientHandler clientHandler : clients) {
+            if (clientHandler.getUsername().equals(username)) {
+                return clientHandler;
+            }
+        }
+        return null;
     }
 }
