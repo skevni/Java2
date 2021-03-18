@@ -4,9 +4,13 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.TextField?>
 <VBox fx:controller="ru.geekbrains.sklyarov.network.chat.client.Controller"
-      xmlns:fx="http://javafx.com/fxml" alignment="center" >
+      xmlns:fx="http://javafx.com/fxml" alignment="center">
+    <HBox fx:id="loginPanel">
+        <TextField fx:id="usernameField" HBox.hgrow="ALWAYS" promptText="Enter your username..."/>
+        <Button text="Login" onAction="#login"/>
+    </HBox>
     <TextArea fx:id="msgArea" VBox.vgrow="ALWAYS" editable="false"/>
-    <HBox>
+    <HBox fx:id="messagePanel" visible="false" managed="false">
         <TextField fx:id="msgField" HBox.hgrow="ALWAYS" promptText="Type message..." onAction="#sendMsg"/>
         <Button text="Send" onAction="#sendMsg"/>
     </HBox>
