@@ -1,17 +1,40 @@
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.control.TextField?>
-<VBox fx:controller="ru.geekbrains.sklyarov.network.chat.client.Controller"
-      xmlns:fx="http://javafx.com/fxml" alignment="center">
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox alignment="center" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.geekbrains.sklyarov.network.chat.client.Controller">
     <HBox fx:id="loginPanel">
-        <TextField fx:id="usernameField" HBox.hgrow="ALWAYS" promptText="Enter your username..."/>
-        <Button text="Login" onAction="#login"/>
+        <Label alignment="CENTER" text="Login" textAlignment="CENTER" HBox.hgrow="ALWAYS">
+         <padding>
+            <Insets left="7.0" right="7.0" top="3.0" />
+         </padding>
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font></Label>
+        <TextField fx:id="usernameField" onAction="#login" promptText="Enter your username..." HBox.hgrow="ALWAYS" />
+      <Label text="Password" HBox.hgrow="ALWAYS">
+         <padding>
+            <Insets left="7.0" right="7.0" top="3.0" />
+         </padding>
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <TextField fx:id="passwordField" onAction="#login" promptText="Enter your password" HBox.hgrow="ALWAYS" />
+        <Button onAction="#login" style="-fx-background-radius: 5;" text="Login" />
     </HBox>
-    <TextArea fx:id="msgArea" VBox.vgrow="ALWAYS" editable="false"/>
-    <HBox fx:id="messagePanel" visible="false" managed="false">
-        <TextField fx:id="msgField" HBox.hgrow="ALWAYS" promptText="Type message..." onAction="#sendMsg"/>
-        <Button text="Send" onAction="#sendMsg"/>
+    <SplitPane fx:id="splitPanel" dividerPositions="0.5" VBox.vgrow="ALWAYS">
+        <TextArea fx:id="msgArea" editable="false" wrapText="true" HBox.hgrow="ALWAYS" />
+        <VBox fx:id="rightPanel" alignment="TOP_RIGHT" maxWidth="200" minWidth="100" prefHeight="400.0" prefWidth="8.0" SplitPane.resizableWithParent="VBox,true">
+            <Button fx:id="btnLogout" onAction="#logout" prefHeight="25.0" prefWidth="70.0" style="-fx-background-radius: 5;" text="Logout" />
+            <ListView fx:id="clients_view" VBox.vgrow="ALWAYS" />
+        </VBox>
+    </SplitPane>
+    <HBox fx:id="messagePanel" managed="false" visible="false">
+        <TextField fx:id="msgField" onAction="#sendMsg" promptText="Type message..." HBox.hgrow="ALWAYS" />
+        <Button onAction="#sendMsg" text="Send" />
     </HBox>
 </VBox>
