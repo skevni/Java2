@@ -13,7 +13,7 @@ public class Server {
     private final InetAddress ip;
     private List<ClientHandler> clients;
     // for authentication
-    private Map<String,String> authMap;
+    private Map<String, Map<String, String>> authMap;
 
     // Конструктор класса, если несколько сетевых интерфейсов и необходимо запустить на опеределенном eth
     public Server(InetAddress ip, int port) {
@@ -35,8 +35,9 @@ public class Server {
             System.out.printf("Server available on %s:%d", ip.toString(), port);
             while (true) {
                 Socket socket = serverSocket.accept();
-                System.out.println("Client connected");
+                System.out.println("Client connecting...");
                 new ClientHandler(this, socket);
+                System.out.println("Client connected");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -97,20 +98,35 @@ public class Server {
     }
 
 
-
     /**
      * Временный метода для реализации авторизации
      * заполнение парой логин - пароль
      */
-    private void fillAuthMap(){
+    private void fillAuthMap() {
         authMap = new ConcurrentHashMap<>();
-        authMap.put("Ivanov","123");
-        authMap.put("Petrov","456");
-        authMap.put("Sidorov","789");
-        authMap.put("Sklyarov","0000");
+
+        Map<String, String> data = new ConcurrentHashMap<>();
+        data.put("123", "IvanovI");
+        authMap.put("Ivanov", data);
+        Map<String, String> data2 = new ConcurrentHashMap<>();
+        data2.put("456", "PetrovP");
+        authMap.put("Petrov", data2);
+        Map<String, String> data3 = new ConcurrentHashMap<>();
+        data3.put("789", "SidorovS");
+        authMap.put("Sidorov", data3);
+        Map<String, String> data4 = new ConcurrentHashMap<>();
+        data4.put("0000", "SklyarovEvgeniy");
+        authMap.put("Sklyarov", data4);
+//        authMap.put("Ivanov", new String[][]);
+//        authMap.put("Petrov", new String[]{"456", "PetrovP"});
+//        authMap.put("Sidorov",(Map<String, String>) (new ConcurrentHashMap<>()).put("789","SidorovSidor"));
+//        authMap.put("Sklyarov",(Map<String, String>) (new ConcurrentHashMap<>()).put("0000","SklyarovEvgeniy"));
     }
 
-    public boolean checkAuth(String login, String password){
-        return authMap.get(login).equals(password);
+    public String checkAuthAndGetNickname(String login, String password) {
+        if (authMap.get(login) == null) {
+            return null;
+        }
+        return authMap.get(login).getOrDefault(password, null);
     }
 }

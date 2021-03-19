@@ -23,7 +23,8 @@
             <Font name="System Bold" size="12.0" />
          </font>
       </Label>
-      <TextField fx:id="passwordField" onAction="#login" promptText="Enter your password" HBox.hgrow="ALWAYS" />
+
+      <PasswordField fx:id="passwordField" onAction="#login" promptText="Enter your password" HBox.hgrow="ALWAYS" />
         <Button onAction="#login" style="-fx-background-radius: 5;" text="Login" />
     </HBox>
     <SplitPane fx:id="splitPanel" dividerPositions="0.5" VBox.vgrow="ALWAYS">

@@ -24,21 +24,22 @@ public class ClientHandler {
                 while (true) {
                     String someMsg = inputStream.readUTF();
                     if (someMsg.startsWith("/login ")) {
-                        String[] userNameForVerification = someMsg.split("\\s",3);
+                        String[] userNameForVerification = someMsg.split("\\s", 3);
 
-                        if (server.isUsernameBusy(userNameForVerification[1])) {
+                        String res = server.checkAuthAndGetNickname(userNameForVerification[1], userNameForVerification[2]);
+                        if (res == null) {
+                            sendMessage("/login_failed Wrong(incorrect) login or password");
+                            continue;
+                        } else {
+                            username = res;
+                        }
+
+                        if (server.isUsernameBusy(username)) {
                             sendMessage("/login_failed Current username is already used");
                             continue;
                         }
 
-                        if (!server.checkAuth(userNameForVerification[1],userNameForVerification[2])){
-                            sendMessage("/login_failed Wrong(incorrect) login or password");
-                            continue;
-                        }
-
-
-
-                        username = userNameForVerification[1];
+//                        username = userNameForVerification[1];
                         sendMessage("/login_successful " + username);
                         server.subscribe(this);
                         break;

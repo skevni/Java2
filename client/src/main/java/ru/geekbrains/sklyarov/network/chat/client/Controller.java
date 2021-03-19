@@ -1,7 +1,6 @@
 package ru.geekbrains.sklyarov.network.chat.client;
 
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -17,7 +16,9 @@ import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
     @FXML
-    TextField msgField, usernameField, passwordField;
+    TextField msgField, usernameField;
+    @FXML
+    PasswordField passwordField;
 
     @FXML
     TextArea msgArea;
@@ -169,5 +170,6 @@ public class Controller implements Initializable {
      */
     public void logout() {
         disconnect();
+        passwordField.clear();
     }
 }
