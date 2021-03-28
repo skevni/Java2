@@ -1,13 +1,11 @@
 package ru.geekbrains.sklyarov.network.chat.client;
 
-import javafx.event.ActionEvent;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -16,9 +14,11 @@ import java.net.Socket;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class Controller {
+public class Controller implements Initializable {
     @FXML
     TextField msgField, usernameField;
+    @FXML
+    PasswordField passwordField;
 
     @FXML
     TextArea msgArea;
@@ -26,23 +26,45 @@ public class Controller {
     @FXML
     HBox loginPanel, messagePanel;
 
+    @FXML
+    VBox rightPanel;
+
+    @FXML
+    ListView<String> clients_view;
+
+    @FXML
+    SplitPane splitPanel;
+
+    @FXML
+    Button btnLogout;
+
     private Socket socket;
     private DataOutputStream out;
     private DataInputStream in;
-    private String username;
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        setUsername(null);
+        usernameField.setText(System.getenv().get("USERNAME"));
+    }
 
     public void setUsername(String username) {
-        this.username = username;
         if (username != null) {
             loginPanel.setVisible(false);
             loginPanel.setManaged(false);
             messagePanel.setVisible(true);
             messagePanel.setManaged(true);
+            splitPanel.setDividerPositions(0.8);
+            rightPanel.setVisible(true);
+            rightPanel.setManaged(true);
         } else {
             loginPanel.setVisible(true);
             loginPanel.setManaged(true);
             messagePanel.setVisible(false);
             messagePanel.setManaged(false);
+            splitPanel.setDividerPositions(1);
+            rightPanel.setVisible(false);
+            rightPanel.setManaged(false);
         }
     }
 
@@ -56,7 +78,7 @@ public class Controller {
             return;
         }
         try {
-            out.writeUTF("/login " + usernameField.getText());
+            out.writeUTF("/login " + usernameField.getText() + " " + passwordField.getText());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -71,7 +93,7 @@ public class Controller {
                 try {
                     while (true) {
                         String someMsg = in.readUTF();
-
+                        // Successful authorization
                         if (someMsg.startsWith("/login_successful ")) {
                             setUsername(someMsg.split("\\s")[1]);
                             break;
@@ -85,9 +107,16 @@ public class Controller {
                         String someMsg = in.readUTF();
 
                         if (someMsg.startsWith("/")) {
-                            // Успешная авторизация
-                            if (someMsg.startsWith("/login_successful ")) {
-                                setUsername(someMsg.split("\\s")[1]);
+
+                            if (someMsg.startsWith("/clients_list;")) {
+                                String[] clientsParts = someMsg.split(";");
+                                // clear ListView
+                                Platform.runLater(() -> {
+                                    clients_view.getItems().clear();
+                                    for (int i = 1; i < clientsParts.length; i++) {
+                                        clients_view.getItems().add(clientsParts[i]);
+                                    }
+                                });
                             }
                             continue;
                         }
@@ -136,5 +165,11 @@ public class Controller {
         }
     }
 
-
+    /***
+     * Logout button handler
+     */
+    public void logout() {
+        disconnect();
+        passwordField.clear();
+    }
 }

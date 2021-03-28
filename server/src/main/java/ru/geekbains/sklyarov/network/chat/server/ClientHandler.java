@@ -6,10 +6,10 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class ClientHandler {
-    private Server server;
-    private Socket socket;
-    private DataInputStream inputStream;
-    private DataOutputStream outputStream;
+    private final Server server;
+    private final Socket socket;
+    private final DataInputStream inputStream;
+    private final DataOutputStream outputStream;
     private String username;
 
     public ClientHandler(Server server, Socket socket) throws IOException {
@@ -24,13 +24,22 @@ public class ClientHandler {
                 while (true) {
                     String someMsg = inputStream.readUTF();
                     if (someMsg.startsWith("/login ")) {
-                        String userNameForVerification = someMsg.split("\\s")[1];
-                        if (server.isUsernameBusy(userNameForVerification)) {
+                        String[] userNameForVerification = someMsg.split("\\s", 3);
+
+                        String res = server.checkAuthAndGetNickname(userNameForVerification[1], userNameForVerification[2]);
+                        if (res == null) {
+                            sendMessage("/login_failed Wrong(incorrect) login or password");
+                            continue;
+                        } else {
+                            username = res;
+                        }
+
+                        if (server.isUsernameBusy(username)) {
                             sendMessage("/login_failed Current username is already used");
                             continue;
                         }
 
-                        username = userNameForVerification;
+//                        username = userNameForVerification[1];
                         sendMessage("/login_successful " + username);
                         server.subscribe(this);
                         break;
@@ -39,32 +48,20 @@ public class ClientHandler {
                 // The cycle of communication with the client
                 while (true) {
                     String someMsg = inputStream.readUTF();
-                    // Sending the current client username
-                    if (someMsg.equals("/who_am_i")) {
-                        outputStream.writeUTF("Your username: " + username);
+                    if (someMsg.startsWith("/")) {
+                        executeCommand(someMsg);
                         continue;
                     }
-                    // Closing a client socket
-                    if (someMsg.equals("/exit")) {
-                        disconnect();
-                    }
-                    // Sending a private message
-                    if (someMsg.startsWith("/w ")) {
-                        String[] privateMessage = someMsg.split("\\s", 3);
-                        ClientHandler cl = server.privateChat(privateMessage[1]);
-                        if (cl != null) {
-                            cl.sendMessage(username + ": " + privateMessage[2]);
-                            sendMessage(username + ": " + privateMessage[2]);
-                        }
-                        continue;
-                    }
+
                     // if it's not a private message, send a broadcast message
                     server.broadcastMessage(username + ": " + someMsg);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-                disconnect();
+                if (!socket.isClosed()) {
+                    disconnect();
+                }
             }
         }).start();
     }
@@ -73,8 +70,38 @@ public class ClientHandler {
         return username;
     }
 
-    public synchronized void sendMessage(String message) throws IOException {
-        outputStream.writeUTF(message);
+    public synchronized void sendMessage(String message) {
+        try {
+            outputStream.writeUTF(message);
+        } catch (IOException e) {
+            disconnect();
+        }
+    }
+
+    private synchronized void executeCommand(String command) {
+// Sending the current client username
+        if (command.equals("/who_am_i")) {
+            sendMessage("Your username: " + username);
+            return;
+        }
+        // Closing a client socket
+        if (command.equals("/exit")) {
+            disconnect();
+            return;
+        }
+        // Sending a private message
+        if (command.startsWith("/w ")) {
+            String[] privateMessage = command.split("\\s", 3);
+            server.privateChat(this, privateMessage[1], privateMessage[2]);
+            return;
+        }
+        // username change
+        if (command.startsWith("/username_change ")) {
+            // если имя введено с пробелом, то возьмем все до пробела
+            this.username = command.split("\\s")[1];
+            // обновим имя у всех
+            server.broadcastClientsList();
+        }
     }
 
     private void disconnect() {
