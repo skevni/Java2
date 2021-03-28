@@ -12,6 +12,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
+import java.net.InetAddress;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
@@ -49,34 +50,27 @@ public class Controller implements Initializable {
     }
 
     public void setUsername(String username) {
-        if (username != null) {
-            loginPanel.setVisible(false);
-            loginPanel.setManaged(false);
-            messagePanel.setVisible(true);
-            messagePanel.setManaged(true);
-            splitPanel.setDividerPositions(0.8);
-            rightPanel.setVisible(true);
-            rightPanel.setManaged(true);
-        } else {
-            loginPanel.setVisible(true);
-            loginPanel.setManaged(true);
-            messagePanel.setVisible(false);
-            messagePanel.setManaged(false);
-            splitPanel.setDividerPositions(1);
-            rightPanel.setVisible(false);
-            rightPanel.setManaged(false);
-        }
+        boolean isUserNameNull = username == null;
+
+        loginPanel.setVisible(isUserNameNull);
+        loginPanel.setManaged(isUserNameNull);
+        messagePanel.setVisible(!isUserNameNull);
+        messagePanel.setManaged(!isUserNameNull);
+        splitPanel.setDividerPositions(1);
+        rightPanel.setVisible(!isUserNameNull);
+        rightPanel.setManaged(!isUserNameNull);
     }
 
     public void login() {
+        if (usernameField.getText().isEmpty()) {
+            alertError("Login cannot be empty");
+            return;
+        }
+
         if (socket == null || socket.isClosed()) {
             connect();
         }
-        if (usernameField.getText().isEmpty()) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Login cannot be empty", ButtonType.OK);
-            alert.showAndWait();
-            return;
-        }
+
         try {
             out.writeUTF("/login " + usernameField.getText() + " " + passwordField.getText());
         } catch (IOException e) {
@@ -86,7 +80,7 @@ public class Controller implements Initializable {
 
     public void connect() {
         try {
-            socket = new Socket("192.168.1.68", 9000);
+            socket = new Socket(InetAddress.getLocalHost().getCanonicalHostName(), 9000);
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
             Thread thread = new Thread(() -> {
@@ -131,13 +125,11 @@ public class Controller implements Initializable {
 
             });
             thread.start();
-
-
         } catch (IOException e) {
 //            e.printStackTrace();
 //            throw new RuntimeException("Unable to connect to server [ 192.168.1.68:9000 ]");
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Unable to connect to server [ 192.168.1.68:9000 ]", ButtonType.OK);
-            alert.showAndWait();
+            alertError("Unable to connect to server [ 192.168.1.68:9000 ]");
+            throw new RuntimeException("Unable to connect to server [ 192.168.1.68:9000 ]");
         }
     }
 
@@ -158,10 +150,7 @@ public class Controller implements Initializable {
             msgField.clear();
             msgField.requestFocus();
         } catch (IOException e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR,
-                    "Unable to send message", ButtonType.OK
-            );
-            alert.showAndWait();
+            alertError("Unable to send message");
         }
     }
 
@@ -171,5 +160,16 @@ public class Controller implements Initializable {
     public void logout() {
         disconnect();
         passwordField.clear();
+    }
+
+    public void alertError(String message){
+        Alert alert = new Alert(Alert.AlertType.ERROR, message);
+        alert.setHeaderText(null);
+        alert.showAndWait();
+    }
+    public void alertInfo(String message){
+        Alert alert = new Alert(Alert.AlertType.INFORMATION, message);
+        alert.setHeaderText(null);
+        alert.showAndWait();
     }
 }
