@@ -37,7 +37,7 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
         databaseConnect();
     }
 
-    public void databaseConnect() {
+    public void databaseConnect()  {
         try {
             Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection("jdbc:sqlite:local.db");
@@ -49,17 +49,13 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
             throw new RuntimeException("Unable to connect to database");
         }
     }
-
-    public void databaseDisconnect() {
-        try {
-            if (prepStmt != null) {
-                prepStmt.close();
-            }
-            if (connection != null) {
-                connection.close();
-            }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+    @Override
+    public void databaseDisconnect() throws SQLException {
+        if (prepStmt != null) {
+            prepStmt.close();
+        }
+        if (connection != null) {
+            connection.close();
         }
     }
 
@@ -68,13 +64,10 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
         prepStmt = connection.prepareStatement("select username from logins where login = ? and password = ?;");
         prepStmt.setString(1, login);
         prepStmt.setString(2, password);
-        connection.setAutoCommit(false);
         try (ResultSet result = prepStmt.executeQuery()) {
             if (result.next()) {
                 return result.getString("username");
             }
-        } finally {
-            connection.setAutoCommit(true);
         }
         return null;
     }
@@ -84,10 +77,7 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
         prepStmt = connection.prepareStatement("update logins set username = ? where username = ?;");
         prepStmt.setString(1, newUserName);
         prepStmt.setString(2, oldUserName);
-        connection.setAutoCommit(false);
         int result = prepStmt.executeUpdate();
-
-        connection.setAutoCommit(true);
         System.out.println("Changed records: " + result);
     }
 
@@ -99,11 +89,9 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
 
     private void dropAndCreateLogins() {
         try (Statement stmt = connection.createStatement()) {
-            connection.setAutoCommit(false);
             stmt.executeUpdate("create table if not exists " +
                     "logins(id INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "login TEXT NOT NULL, password TEXT NOT NULL, username TEXT NOT NULL);");
-            connection.setAutoCommit(true);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }

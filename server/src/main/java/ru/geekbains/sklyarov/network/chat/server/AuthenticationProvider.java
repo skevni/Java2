@@ -6,4 +6,6 @@ public interface AuthenticationProvider {
     String getUserNameByLoginPassword(String login, String password) throws SQLException;
 
     void changeUserName(String oldUserName, String newUserName) throws SQLException;
+
+    void databaseDisconnect() throws SQLException;
 }

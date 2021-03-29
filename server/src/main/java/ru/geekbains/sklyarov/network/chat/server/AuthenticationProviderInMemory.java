@@ -48,4 +48,8 @@ public class AuthenticationProviderInMemory implements AuthenticationProvider {
             }
         }
     }
+
+    @Override
+    public void databaseDisconnect() {
+    }
 }

@@ -47,9 +47,16 @@ public class Server {
             }
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            // do smth
-            System.out.println("finally");
+        }
+    }
+    /* Пока не знаю как этот метод задействовать для остановки сервера - т.к. он по сути является сервисом(службой)
+    *   интерфейса для сервера пока что нет
+    */
+    public void stop(){
+        try {
+            authenticationProvider.databaseDisconnect();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
         }
     }
 
