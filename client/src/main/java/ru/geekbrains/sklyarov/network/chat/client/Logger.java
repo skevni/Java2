@@ -8,8 +8,10 @@ public class Logger {
     public Logger(String username) throws IOException {
         String filePath = String.format("logs/history_%s.txt", username);
         historyFile = new File(filePath);
-        if (!historyFile.createNewFile()) {
-            throw new FileNotFoundException("Unable to create file: " + filePath);
+        if (!historyFile.exists()) {
+            if (!historyFile.createNewFile()) {
+                throw new FileNotFoundException("Unable to create file: " + filePath);
+            }
         }
     }
 
