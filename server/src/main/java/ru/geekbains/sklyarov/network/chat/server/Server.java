@@ -34,6 +34,10 @@ public class Server {
 
     private void start() {
 //        authenticationProvider = new AuthenticationProviderInMemory();
+        /*
+        * Здесь создастся коннект (Connection) и потом можно к нему обращаться как DatabaseAuthenticationProvider.connection
+        * На уроке говорили ,что нужно отдельный класс для этого сделать. А так нельзя?
+         */
         authenticationProvider = new DatabaseAuthenticationProvider();
         this.clients = new ArrayList<>();
 

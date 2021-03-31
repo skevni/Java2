@@ -43,6 +43,8 @@ public class Controller implements Initializable {
     private DataOutputStream out;
     private DataInputStream in;
 
+    private Logger logger;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setUsername(null);
@@ -83,6 +85,7 @@ public class Controller implements Initializable {
             socket = new Socket(InetAddress.getLocalHost().getCanonicalHostName(), 9000);
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
+
             Thread thread = new Thread(() -> {
                 try {
                     while (true) {
@@ -96,6 +99,9 @@ public class Controller implements Initializable {
                             msgArea.appendText(someMsg.split("\\s", 2)[1] + "\n");
                         }
                     }
+                    // вывод истории
+                    logger = new Logger(String.format("logs/history_%s.txt", usernameField.getText()));
+                    msgArea.appendText(logger.readFromFile());
 
                     while (true) {
                         String someMsg = in.readUTF();
@@ -116,6 +122,7 @@ public class Controller implements Initializable {
                         }
 
                         msgArea.appendText(someMsg + "\n");
+                        logger.writeToFile(someMsg + "\n");
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
