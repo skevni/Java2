@@ -5,7 +5,8 @@ import java.io.*;
 public class Logger {
     private final File historyFile;
 
-    public Logger(String filePath) throws IOException {
+    public Logger(String username) throws IOException {
+        String filePath = String.format("logs/history_%s.txt", username);
         historyFile = new File(filePath);
         if (!historyFile.createNewFile()) {
             throw new FileNotFoundException("Unable to create file: " + filePath);

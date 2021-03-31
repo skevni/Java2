@@ -100,7 +100,7 @@ public class Controller implements Initializable {
                         }
                     }
                     // вывод истории
-                    logger = new Logger(String.format("logs/history_%s.txt", usernameField.getText()));
+                    logger = new Logger(usernameField.getText());
                     msgArea.appendText(logger.readFromFile());
 
                     while (true) {
@@ -169,12 +169,13 @@ public class Controller implements Initializable {
         passwordField.clear();
     }
 
-    public void alertError(String message){
+    public void alertError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR, message);
         alert.setHeaderText(null);
         alert.showAndWait();
     }
-    public void alertInfo(String message){
+
+    public void alertInfo(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION, message);
         alert.setHeaderText(null);
         alert.showAndWait();
