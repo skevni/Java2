@@ -68,13 +68,4 @@ public class Logger {
         result.trimToSize();
         return result.toString();
     }
-
-//    private void fillHistory() throws IOException{
-//        try (BufferedWriter bw = new BufferedWriter(new FileWriter(historyFile))) {
-//            for (int i = 0; i < 10_000_000; i++) {
-//                bw.write("User: message #" + i + "\n");
-//            }
-//        }
-//    }
-
 }

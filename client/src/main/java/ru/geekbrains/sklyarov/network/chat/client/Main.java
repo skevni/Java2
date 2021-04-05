@@ -27,12 +27,12 @@ public class Main extends Application {
         primaryStage.setOnCloseRequest(event -> {
             try {
                 stop();
-
-                // Так можно делать? Пока не могу найти правильного решения.
-                Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
-                for (Thread t : threadSet) {
-                    t.interrupt();
-                }
+                
+//                // Так можно делать? Пока не могу найти правильного решения.
+//                Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+//                for (Thread t : threadSet) {
+//                    t.interrupt();
+//                }
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
