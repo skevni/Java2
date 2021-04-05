@@ -34,11 +34,8 @@ public class Server {
 
     private void start() {
 //        authenticationProvider = new AuthenticationProviderInMemory();
-        /*
-        * Здесь создастся коннект (Connection) и потом можно к нему обращаться как DatabaseAuthenticationProvider.connection
-        * На уроке говорили ,что нужно отдельный класс для этого сделать. А так нельзя?
-         */
-        authenticationProvider = new DatabaseAuthenticationProvider();
+        this.authenticationProvider = new DatabaseAuthenticationProvider();
+        this.authenticationProvider.init();
         this.clients = new ArrayList<>();
 
         try (ServerSocket serverSocket = new ServerSocket(port, 0, ip)) {
@@ -51,17 +48,15 @@ public class Server {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            this.authenticationProvider.shutdown();
         }
     }
     /* Пока не знаю как этот метод задействовать для остановки сервера - т.к. он по сути является сервисом(службой)
     *   интерфейса для сервера пока что нет
     */
     public void stop(){
-        try {
-            authenticationProvider.databaseDisconnect();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
+        this.authenticationProvider.shutdown();
     }
 
     public synchronized void subscribe(ClientHandler clientHandler) {
