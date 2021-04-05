@@ -5,6 +5,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.sql.SQLException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ClientHandler {
     private final Server server;
@@ -12,6 +14,7 @@ public class ClientHandler {
     private final DataInputStream inputStream;
     private final DataOutputStream outputStream;
     private String username;
+    private ExecutorService pool = Executors.newFixedThreadPool(4);
 
     public ClientHandler(Server server, Socket socket) throws IOException {
         this.server = server;
@@ -19,7 +22,17 @@ public class ClientHandler {
         this.inputStream = new DataInputStream(socket.getInputStream());
         this.outputStream = new DataOutputStream(socket.getOutputStream());
 
-        new Thread(() -> {
+        /* По идее нужно использовать пул потоков, т.к. много открытых потоков приведет к исчерпанию ресурсов
+        * newCachedThreadPool - не стоит использовать, т.к. нет верхней границы, что опять же приведет к исчерпанию
+        * системных ресурсов
+        * newFixedThreadPool - думаю самый подходящий. Количество потоков при большом количестве клиентов брать равным
+        * количеству ядер в системе
+        *
+        * С увеличением количества потоков происходит увеличение времени преключения контекста процессора, что замедляет
+        * работу, т.к. процесор во время переключения контекста не выполняет полезной работы
+        *
+        */
+        pool.execute(()->{
             try {
                 // Authorization cycle
                 while (true) {
@@ -48,6 +61,7 @@ public class ClientHandler {
                         break;
                     }
                 }
+//                Thread.currentThread().setName("Thread-" + username);
                 // The cycle of communication with the client
                 while (true) {
                     String someMsg = inputStream.readUTF();
@@ -66,7 +80,7 @@ public class ClientHandler {
                     disconnect();
                 }
             }
-        }).start();
+        });
     }
 
     public String getUsername() {

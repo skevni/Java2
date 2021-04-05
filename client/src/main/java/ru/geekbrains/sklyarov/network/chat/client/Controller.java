@@ -85,7 +85,7 @@ public class Controller implements Initializable {
             socket = new Socket(InetAddress.getLocalHost().getCanonicalHostName(), 9000);
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
-
+            // В клиенте нет необходимости использовать пул потоков
             Thread thread = new Thread(() -> {
                 try {
                     while (true) {
