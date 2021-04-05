@@ -50,6 +50,12 @@ public class AuthenticationProviderInMemory implements AuthenticationProvider {
     }
 
     @Override
-    public void databaseDisconnect() {
+    public void init() {
+
+    }
+
+    @Override
+    public void shutdown() {
+
     }
 }
