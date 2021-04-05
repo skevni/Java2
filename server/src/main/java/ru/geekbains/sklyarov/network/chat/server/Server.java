@@ -34,6 +34,10 @@ public class Server {
 
     private void start() {
 //        authenticationProvider = new AuthenticationProviderInMemory();
+        /*
+         * Здесь создастся коннект (Connection) и потом можно к нему обращаться как DatabaseAuthenticationProvider.connection
+         * На уроке говорили ,что нужно отдельный класс для этого сделать. А так нельзя?
+         */
         authenticationProvider = new DatabaseAuthenticationProvider();
         this.clients = new ArrayList<>();
 
@@ -42,6 +46,9 @@ public class Server {
             while (true) {
                 Socket socket = serverSocket.accept();
                 System.out.println("Client connecting...");
+                /*
+                    Нет смысла ипользовать пул потоков, это не ускорит работу
+                 */
                 new ClientHandler(this, socket);
                 System.out.println("Client connected");
             }
@@ -49,10 +56,11 @@ public class Server {
             e.printStackTrace();
         }
     }
+
     /* Пока не знаю как этот метод задействовать для остановки сервера - т.к. он по сути является сервисом(службой)
-    *   интерфейса для сервера пока что нет
-    */
-    public void stop(){
+     *   интерфейса для сервера пока что нет
+     */
+    public void stop() {
         try {
             authenticationProvider.databaseDisconnect();
         } catch (SQLException throwables) {

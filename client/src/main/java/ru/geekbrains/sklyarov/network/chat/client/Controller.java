@@ -43,6 +43,8 @@ public class Controller implements Initializable {
     private DataOutputStream out;
     private DataInputStream in;
 
+    private Logger logger;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setUsername(null);
@@ -83,6 +85,7 @@ public class Controller implements Initializable {
             socket = new Socket(InetAddress.getLocalHost().getCanonicalHostName(), 9000);
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
+            // В клиенте нет необходимости использовать пул потоков
             Thread thread = new Thread(() -> {
                 try {
                     while (true) {
@@ -96,6 +99,9 @@ public class Controller implements Initializable {
                             msgArea.appendText(someMsg.split("\\s", 2)[1] + "\n");
                         }
                     }
+                    // вывод истории
+                    logger = new Logger(usernameField.getText());
+                    msgArea.appendText(logger.readFromFile());
 
                     while (true) {
                         String someMsg = in.readUTF();
@@ -116,6 +122,7 @@ public class Controller implements Initializable {
                         }
 
                         msgArea.appendText(someMsg + "\n");
+                        logger.writeToFile(someMsg + "\n");
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -162,12 +169,13 @@ public class Controller implements Initializable {
         passwordField.clear();
     }
 
-    public void alertError(String message){
+    public void alertError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR, message);
         alert.setHeaderText(null);
         alert.showAndWait();
     }
-    public void alertInfo(String message){
+
+    public void alertInfo(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION, message);
         alert.setHeaderText(null);
         alert.showAndWait();

@@ -5,6 +5,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.sql.SQLException;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ClientHandler {
     private final Server server;
@@ -18,6 +21,10 @@ public class ClientHandler {
         this.socket = socket;
         this.inputStream = new DataInputStream(socket.getInputStream());
         this.outputStream = new DataOutputStream(socket.getOutputStream());
+
+        /*
+        Нет смысла сипользовать пул потоков
+         */
 
         new Thread(() -> {
             try {
@@ -48,6 +55,7 @@ public class ClientHandler {
                         break;
                     }
                 }
+                Thread.currentThread().setName("Thread-" + username);
                 // The cycle of communication with the client
                 while (true) {
                     String someMsg = inputStream.readUTF();
