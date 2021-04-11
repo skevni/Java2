@@ -37,13 +37,13 @@ public class ClientHandler {
                         String[] userNameForVerification = someMsg.split("\\s+");
                         if (userNameForVerification.length != 3) {
                             sendMessage("/login_failed Incorrect command for authentication");
-                            logger.debug("Send command to client: \"/login_failed Incorrect command for authentication\" for user %s",userNameForVerification[1]);
+                            logger.debug("Send command to client: \"/login_failed Incorrect command for authentication\" for user {}",userNameForVerification[1]);
                             continue;
                         }
                         String res = server.checkAuthAndGetNickname(userNameForVerification[1], userNameForVerification[2]);
                         if (res == null) {
                             sendMessage("/login_failed Wrong(incorrect) login or password");
-                            logger.debug("Send command to client: \"/login_failed Wrong(incorrect) login or password\" for user %s",userNameForVerification[1]);
+                            logger.debug("Send command to client: \"/login_failed Wrong(incorrect) login or password\" for user {}",userNameForVerification[1]);
                             continue;
                         } else {
                             username = res;
@@ -66,7 +66,7 @@ public class ClientHandler {
                 while (true) {
                     String someMsg = inputStream.readUTF();
                     if (someMsg.startsWith("/")) {
-                        logger.debug("The client sent the command %s", someMsg);
+                        logger.debug("The client sent the command {}", someMsg);
                         executeCommand(someMsg);
                         continue;
                     }
@@ -116,7 +116,7 @@ public class ClientHandler {
         if (command.startsWith("/w ")) {
             String[] privateMessage = command.split("\\s+", 3);
             server.privateChat(this, privateMessage[1], privateMessage[2]);
-            logger.debug("The client sent a privat message from %s to %s", username, privateMessage[1]);
+            logger.debug("The client sent a privat message from {} to {}", username, privateMessage[1]);
             return;
         }
         // username change
@@ -131,7 +131,7 @@ public class ClientHandler {
             // If the username is busy
             if (server.isUsernameBusy(userNameTokens[1])) {
                 sendMessage("Server: Current username is already used.");
-                logger.debug("Current username is already used. User: %s", userNameTokens[1]);
+                logger.debug("Current username is already used. User: {}", userNameTokens[1]);
                 return;
             }
 
@@ -139,7 +139,7 @@ public class ClientHandler {
                 server.getAuthenticationProvider().changeUserName(username, userNameTokens[1]);
             } catch (SQLException throwables) {
                 sendMessage("Server: Username has not been changed");
-                logger.debug("Username has not been changed. User from: %s, to: %s", username,userNameTokens[1]);
+                logger.debug("Username has not been changed. User from: {}, to: {}", username,userNameTokens[1]);
                 return;
             }
             this.username = userNameTokens[1];
