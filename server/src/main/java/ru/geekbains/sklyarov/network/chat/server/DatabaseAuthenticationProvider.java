@@ -1,27 +1,11 @@
 package ru.geekbains.sklyarov.network.chat.server;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class DatabaseAuthenticationProvider implements AuthenticationProvider {
-    /*
-     * The technological class used to fill the table "logins"
-     */
-
-    private class User {
-        private final String login;
-        private final String password;
-        private final String userName;
-
-        public User(String login, String password, String userName) {
-            this.login = login;
-            this.password = password;
-            this.userName = userName;
-        }
-
-    }
 
     public static Connection connection;
     /* Если статический Statement или PreparedStatement, то он же будет один для всех экземпляров данного класса?
@@ -31,6 +15,8 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
         экземпляра класса?
     */
     public static PreparedStatement prepStmt;
+
+    private static final Logger log = LogManager.getLogger(DatabaseAuthenticationProvider.class);
 
     // The constructor
     public DatabaseAuthenticationProvider() {
@@ -46,6 +32,7 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
 //            fillLogins();
 
         } catch (ClassNotFoundException | SQLException e) {
+            log.error("Unable to connect to database", e);
             throw new RuntimeException("Unable to connect to database");
         }
     }
@@ -78,7 +65,7 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
         prepStmt.setString(1, newUserName);
         prepStmt.setString(2, oldUserName);
         int result = prepStmt.executeUpdate();
-        System.out.println("Changed records: " + result);
+
     }
 
     /*
@@ -93,42 +80,8 @@ public class DatabaseAuthenticationProvider implements AuthenticationProvider {
                     "logins(id INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "login TEXT NOT NULL, password TEXT NOT NULL, username TEXT NOT NULL);");
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            log.error("Error in the method of creating and dropping a table", throwables);
+//            throwables.printStackTrace();
         }
     }
-
-    private void fillLogins() {
-        List<User> users = new ArrayList<>(Arrays.asList(
-                new User("John", "123", "JohnJ"),
-                new User("Bob", "456", "BobB"),
-                new User("Ken", "789", "KenK"),
-                new User("Sklyarov", "0000", "Evgeniy")
-        ));
-
-        try {
-            connection.setAutoCommit(false);
-            prepStmt = connection.prepareStatement("DELETE FROM logins;VACUUM logins;");
-            prepStmt.executeUpdate();
-
-            connection.commit();
-
-            prepStmt = connection.prepareStatement("Insert into logins (login, password, username) values(?,?,?);");
-            for (User u : users) {
-                prepStmt.setString(1, u.login);
-                prepStmt.setString(2, u.password);
-                prepStmt.setString(3, u.userName);
-                prepStmt.executeUpdate();
-            }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        } finally {
-            try {
-                connection.setAutoCommit(true);
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
-        }
-    }
-
-
 }
