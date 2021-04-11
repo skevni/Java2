@@ -1,5 +1,8 @@
 package ru.geekbains.sklyarov.network.chat.server;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -8,12 +11,15 @@ import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.util.*;
 
+
 public class Server {
     private final int port;
     private final InetAddress ip;
     private List<ClientHandler> clients;
     // Interface for authentication
     private AuthenticationProvider authenticationProvider;
+    // logging
+    private static final Logger logger = LogManager.getLogger(Server.class);
 
     // Конструктор класса, если несколько сетевых интерфейсов и необходимо запустить на опеределенном eth
     public Server(InetAddress ip, int port) {
@@ -42,18 +48,22 @@ public class Server {
         this.clients = new ArrayList<>();
 
         try (ServerSocket serverSocket = new ServerSocket(port, 0, ip)) {
-            System.out.printf("Server available on %s:%d", ip.toString(), port);
+            logger.info("Server available on {}:{}", ip.toString(), port);
+//            System.out.printf("Server available on %s:%d", ip.toString(), port);
             while (true) {
                 Socket socket = serverSocket.accept();
-                System.out.println("Client connecting...");
+                logger.debug("Client connecting...");
+//                System.out.println("Client connecting...");
                 /*
                     Нет смысла ипользовать пул потоков, это не ускорит работу
                  */
                 new ClientHandler(this, socket);
-                System.out.println("Client connected");
+//                System.out.println("Client connected");
+                logger.debug("Client connected");
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Server socket creation error", e.fillInStackTrace());
+//            e.printStackTrace();
         }
     }
 
@@ -63,8 +73,9 @@ public class Server {
     public void stop() {
         try {
             authenticationProvider.databaseDisconnect();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            logger.error("Server stop error", e.fillInStackTrace());
+//            e.printStackTrace();
         }
     }
 
@@ -122,7 +133,7 @@ public class Server {
         try {
             return authenticationProvider.getUserNameByLoginPassword(login, password);
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            logger.error("User authentication error",throwables.fillInStackTrace());
         }
         return null;
     }

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="FATAL" debug="false">
+    <Properties>
+        <Property name="logPath">logs</Property>
+    </Properties>
+    <Appenders>
+        <Console name="stdout" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="%d{dd.MM.yyyy HH:mm:ss,SSS} %-5p [%t] %C{1}.%M(%F:%L) - %m%n%throwable"/>
+            <!--            <MarkerFilter onMatch="ACCEPT" onMisMatch="DENY" marker="FLOW"/>-->
+        </Console>
+        <RollingFile name="server"
+                     fileName="${logPath}/server.log"
+                     filePattern="${logPath}/archive/server-%d{MM-dd-yy}.log.gz"
+                     append="true">
+            <PatternLayout pattern="%d{dd.MM.yyyy HH:mm:ss,SSS} %-5p [%t] %C{1}.%M(%F:%L) - %m%n%throwable"/>
+            <Policies>
+                <CronTriggeringPolicy schedule="0 0 0 * * ?"/>
+                <SizeBasedTriggeringPolicy size="100M"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+        <!--        <File name="FileSystem" fileName="${logPath}/fileSystem.log">
+                    <PatternLayout pattern="%d [%t] %-5level: %msg%n%throwable"/>
+                    </File> -->
+    </Appenders>
+    <Loggers>
+        <!-- trace debug info warning error fatal off -->
+        <Root level="fatal" additivity="false">
+            <AppenderRef ref="stdout"/>
+        </Root>
+        <Logger name="ru.geekbains.sklyarov.network.chat.server.ServerApp" level="fatal" additivity="true">
+            <AppenderRef ref="server"/>
+        </Logger>
+        <Logger name="ru.geekbains.sklyarov.network.chat.server.Server" level="error" additivity="true">
+            <AppenderRef ref="server"/>
+        </Logger>
+        <Logger name="ru.geekbains.sklyarov.network.chat.server.ClientHandler" level="error" additivity="true">
+            <AppenderRef ref="server"/>
+        </Logger>
+    </Loggers>
+</Configuration>

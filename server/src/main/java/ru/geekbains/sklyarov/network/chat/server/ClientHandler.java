@@ -1,13 +1,13 @@
 package ru.geekbains.sklyarov.network.chat.server;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.sql.SQLException;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class ClientHandler {
     private final Server server;
@@ -15,6 +15,8 @@ public class ClientHandler {
     private final DataInputStream inputStream;
     private final DataOutputStream outputStream;
     private String username;
+
+    private static final Logger logger = LogManager.getLogger(ClientHandler.class);
 
     public ClientHandler(Server server, Socket socket) throws IOException {
         this.server = server;
@@ -35,11 +37,13 @@ public class ClientHandler {
                         String[] userNameForVerification = someMsg.split("\\s+");
                         if (userNameForVerification.length != 3) {
                             sendMessage("/login_failed Incorrect command for authentication");
+                            logger.debug("Send command to client: \"/login_failed Incorrect command for authentication\" for user %s",userNameForVerification[1]);
                             continue;
                         }
                         String res = server.checkAuthAndGetNickname(userNameForVerification[1], userNameForVerification[2]);
                         if (res == null) {
                             sendMessage("/login_failed Wrong(incorrect) login or password");
+                            logger.debug("Send command to client: \"/login_failed Wrong(incorrect) login or password\" for user %s",userNameForVerification[1]);
                             continue;
                         } else {
                             username = res;
@@ -47,10 +51,12 @@ public class ClientHandler {
 
                         if (server.isUsernameBusy(username)) {
                             sendMessage("/login_failed Current username is already used");
+                            logger.debug("Send command to client: \"/login_failed Current username is already used\" for user {}",username);
                             continue;
                         }
 
                         sendMessage("/login_successful " + username);
+                        logger.debug("Send command to client: \"/login_successful\" for user {}", username);
                         server.subscribe(this);
                         break;
                     }
@@ -60,14 +66,17 @@ public class ClientHandler {
                 while (true) {
                     String someMsg = inputStream.readUTF();
                     if (someMsg.startsWith("/")) {
+                        logger.debug("The client sent the command %s", someMsg);
                         executeCommand(someMsg);
                         continue;
                     }
 
                     // if it's not a private message, send a broadcast one.
                     server.broadcastMessage(username + ": " + someMsg);
+                    logger.debug("The client sent the message to everyone");
                 }
             } catch (IOException e) {
+                logger.error("Error creating user handler", e.fillInStackTrace());
                 e.printStackTrace();
             } finally {
                 if (!socket.isClosed()) {
@@ -85,6 +94,7 @@ public class ClientHandler {
         try {
             outputStream.writeUTF(message);
         } catch (IOException e) {
+            logger.error("Error sending message to user", e.fillInStackTrace());
             disconnect();
         }
     }
@@ -93,10 +103,12 @@ public class ClientHandler {
 // Sending the current client username
         if (command.equals("/who_am_i")) {
             sendMessage("Your username: " + username);
+            logger.debug("The client sent a message to know who is he");
             return;
         }
         // Closing a client socket
         if (command.equals("/exit")) {
+            logger.debug("The client sent a message to disconnect from the server");
             disconnect();
             return;
         }
@@ -104,6 +116,7 @@ public class ClientHandler {
         if (command.startsWith("/w ")) {
             String[] privateMessage = command.split("\\s+", 3);
             server.privateChat(this, privateMessage[1], privateMessage[2]);
+            logger.debug("The client sent a privat message from %s to %s", username, privateMessage[1]);
             return;
         }
         // username change
@@ -112,19 +125,21 @@ public class ClientHandler {
             // If the username is entered with a space, return an error message
             if (userNameTokens.length != 2) {
                 sendMessage("Server: Incorrect command for change username. Username can't contain a space!");
+                logger.debug("Incorrect command for change username. Username can't contain a space!");
                 return;
             }
             // If the username is busy
             if (server.isUsernameBusy(userNameTokens[1])) {
                 sendMessage("Server: Current username is already used.");
+                logger.debug("Current username is already used. User: %s", userNameTokens[1]);
                 return;
             }
-            // Remember username in the InMemory database.
 
             try {
                 server.getAuthenticationProvider().changeUserName(username, userNameTokens[1]);
             } catch (SQLException throwables) {
                 sendMessage("Server: Username has not been changed");
+                logger.debug("Username has not been changed. User from: %s, to: %s", username,userNameTokens[1]);
                 return;
             }
             this.username = userNameTokens[1];
@@ -139,6 +154,7 @@ public class ClientHandler {
             try {
                 socket.close();
             } catch (IOException e) {
+                logger.error("Error disconnecting user from server", e.fillInStackTrace());
                 e.printStackTrace();
             }
         }
